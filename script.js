@@ -1,4 +1,22 @@
+
 document.addEventListener('DOMContentLoaded', (event) => {
+
+
+    function fitMathFunc(){
+        const x = []
+        const y = []
+        
+        for(let i =0; i<=100; i++){
+            const xValue = i/10
+            x.push(xValue);
+            y.push(yValue);
+        }
+        
+        return {x,y};
+        
+        }
+        
+        
 
     let line1 = {
         x: [1, 2, 3, 4, 5],
@@ -98,7 +116,27 @@ let layout2 = {
     Plotly.newPlot('logPlot', data3,layout2)
 
 
+    const data4 = fitMathFunc();
 
+    const trace = {
+        x: data4.x,
+        y: data4.y,
+        mode: 'lines',
+        type: 'scatter'
+    };
+    
+    const layout4 = {
+        title:"plot of sin(x)",
+        xaxis:{
+            title:'x'
+        },
+        yaxis:{
+            title:'y'
+        }
+
+    };
+
+    Plotly.newPlot('funcPlot', [trace], layout4);
 
 });
 
