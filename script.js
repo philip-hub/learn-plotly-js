@@ -21,8 +21,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
     let line2 = {
         x: [2,3,4,5],
-        y: [16,5,11,9],
-        mode: 'markers+text',
+        y: [4,1,7,1,4],
+        mode: 'markers',
         type: 'scatter',
         name: 'Team B',
         text: ['B-1','B-2','B-3','B-4','B-5'],
