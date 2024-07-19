@@ -17,6 +17,32 @@ document.addEventListener('DOMContentLoaded', (event) => {
         
         return { x, y, text };
     }
+
+
+    function generateData(numPoints, numChromosomes){
+        const x = [];
+        const logRatio = [];
+        const bAlleleFrequency = [];
+        const chromosomes = [];
+
+        for(let chr = 1; chr <= numChromosomes; chr++) {
+            for(let i =0; i<numPoints; i++){
+                const value = Math.random()*2 -1 //random numbers between -1 and 1
+
+                const baf = Math.random(); //generate random values
+
+                x.push(i+(chr-1)*numPoints);
+                logRatio.push(value);
+                bAlleleFrequency.push(baf);
+                chromosomes.push(chr);
+            }
+
+
+
+        }
+
+        return {x, logRatio, bAlleleFrequency, chromosomes};
+    }
         
         
 
@@ -86,60 +112,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
     };
 
     Plotly.newPlot('scatterPlot2', data2,layout)
-
-//log plot
-
-let line4 = {
-    x:[0,1,2,3,4,5,6,7,8],
-    y:[0,1,2,3,4,5,6,,7,8],
-    type: 'scatter'
-};
-
-let line5 = {
-    x:[0,1,2,3,4,5,6,7,8],
-    y:[8,7,6,5,4,3,2,1,0],
-    type: 'scatter'
-}
-
-let data3 = [line4,line5]
-
-let layout2 = {
-    xaxis:{
-        type: 'log',
-        autorange: true
-    },
-    yaxis:{
-        type:'log',
-        autorange: true
-    }
-
-};
-
-    Plotly.newPlot('logPlot', data3,layout2)
-
-
-    const data4 = fitMathFunc();
-
-    const trace = {
-        x: data4.x,
-        y: data4.y,
-        text: data4.text,
-        mode: 'lines',
-        type: 'scatter'
-    };
-    
-    const layout4 = {
-        title:"plot of sin(x)",
-        xaxis:{
-            title:'x'
-        },
-        yaxis:{
-            title:'y'
-        }
-
-    };
-
-    Plotly.newPlot('funcPlot', [trace], layout4);
 
 });
 
