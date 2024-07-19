@@ -95,7 +95,6 @@ let layout2 = {
 
 };
 
-
     Plotly.newPlot('logPlot', data3,layout2)
 
 
