@@ -67,5 +67,41 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
     Plotly.newPlot('scatterPlot2', data2,layout)
 
+//log plot
+
+let line4 = {
+    x:[0,1,2,3,4,5,6,7,8],
+    y:[0,1,2,3,4,5,6,,7,8],
+    type: 'scatter'
+};
+
+let line5 = {
+    x:[0,1,2,3,4,5,6,7,8],
+    y:[8,7,6,5,4,3,2,1,0],
+    type: 'scatter'
+}
+
+let data3 = [line4,line5]
+
+let layout2 = {
+    xaxis:{
+        type: 'log',
+        autorange: true
+    },
+    yaxis:{
+        type:'log',
+        autorange: true
+    }
+
+};
+
+
+    Plotly.newPlot('logPlot', data3,layout2)
+
+
+
 
 });
+
+
+
