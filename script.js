@@ -1,4 +1,3 @@
-
 document.addEventListener('DOMContentLoaded', (event) => {
 
 
@@ -114,6 +113,3 @@ document.addEventListener('DOMContentLoaded', (event) => {
     Plotly.newPlot('scatterPlot2', data2,layout)
 
 });
-
-
-
