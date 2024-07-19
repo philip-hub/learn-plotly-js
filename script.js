@@ -17,6 +17,30 @@ document.addEventListener('DOMContentLoaded', (event) => {
         
         return { x, y, text };
     }
+
+
+    function generateData(numPoints, numChromosomes){
+        const x = [];
+        const logRatio = [];
+        const bAlleleFrequency = [];
+        const chromosomes = [];
+
+        for(let chr = 1; chr <= numChromosomes; chr++) {
+            for(let i =0; i<numPointsl; i++){
+                const value = Math.random *2 -1 //random numbers between -1 and 1
+
+                const baf = Math.random(); //generate random values
+
+                x.push(i+(chr-1)*numPoints);
+                logRatio.push(value);
+                bAlleleFrequency.push(baf);
+                chromosomes.push(chr);
+            }
+
+
+
+        }
+    }
         
         
 
