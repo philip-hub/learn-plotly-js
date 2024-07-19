@@ -5,15 +5,17 @@ document.addEventListener('DOMContentLoaded', (event) => {
     function fitMathFunc(){
         const x = []
         const y = []
+        const text = []
         
         for(let i = 0; i <= 100; i++){
             const xValue = i / 10;
             const yValue = Math.sin(xValue); // Calculate y = sin(x)
             x.push(xValue);
             y.push(yValue);
+            text.push("Sin Function")
         }
         
-        return { x, y };
+        return { x, y, text };
     }
         
         
@@ -121,6 +123,7 @@ let layout2 = {
     const trace = {
         x: data4.x,
         y: data4.y,
+        text: data4.text,
         mode: 'lines',
         type: 'scatter'
     };
