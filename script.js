@@ -6,15 +6,15 @@ document.addEventListener('DOMContentLoaded', (event) => {
         const x = []
         const y = []
         
-        for(let i =0; i<=100; i++){
-            const xValue = i/10
+        for(let i = 0; i <= 100; i++){
+            const xValue = i / 10;
+            const yValue = Math.sin(xValue); // Calculate y = sin(x)
             x.push(xValue);
             y.push(yValue);
         }
         
-        return {x,y};
-        
-        }
+        return { x, y };
+    }
         
         
 
