@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
     const chromoData = generateData(1000, 24);
     let selectedPoints = []; // To track selected points
     let highlightedIndices = []; // To track indices of highlighted points
+    let chromosomeLines = {}; // To track added lines for chromosomes
 
     const trace1 = {
         x: chromoData.x,
@@ -121,16 +122,79 @@ document.addEventListener('DOMContentLoaded', (event) => {
         Plotly.react('plotAllFreq', [trace2, trace2Highlight], layout6);
     }
 
+    function addChromosomeLines(chromosome) {
+        const chrStart = (chromosome - 1) * 1000;
+        const chrEnd = chromosome * 1000 - 1;
+
+        if (!chromosomeLines[chromosome]) {
+            chromosomeLines[chromosome] = true;
+
+            layout5.shapes.push({
+                type: 'line',
+                x0: chrStart,
+                x1: chrStart,
+                y0: -2,
+                y1: 2,
+                line: {
+                    color: 'blue',
+                    width: 2,
+                    dash: 'dot'
+                }
+            });
+
+            layout5.shapes.push({
+                type: 'line',
+                x0: chrEnd,
+                x1: chrEnd,
+                y0: -2,
+                y1: 2,
+                line: {
+                    color: 'blue',
+                    width: 2,
+                    dash: 'dot'
+                }
+            });
+
+            layout6.shapes.push({
+                type: 'line',
+                x0: chrStart,
+                x1: chrStart,
+                y0: 0,
+                y1: 1,
+                line: {
+                    color: 'blue',
+                    width: 2,
+                    dash: 'dot'
+                }
+            });
+
+            layout6.shapes.push({
+                type: 'line',
+                x0: chrEnd,
+                x1: chrEnd,
+                y0: 0,
+                y1: 1,
+                line: {
+                    color: 'blue',
+                    width: 2,
+                    dash: 'dot'
+                }
+            });
+
+            Plotly.react('plotLogRatio', [trace1, { ...trace1, marker: { ...trace1.marker, size: 2 } }], layout5);
+            Plotly.react('plotAllFreq', [trace2, { ...trace2, marker: { ...trace2.marker, size: 2 } }], layout6);
+        }
+    }
+
     function highlightPoint(pointIndex, pointData, plotId) {
         const highlightColor = 'red';
         const xValue = chromoData.x[pointIndex];
         const logRatioValue = chromoData.logRatio[pointIndex];
         const bAlleleFrequencyValue = chromoData.bAlleleFrequency[pointIndex];
         const chromosome = chromoData.chromosomes[pointIndex];
-        const chrStart = (chromosome - 1) * 1000;
-        const chrEnd = chromosome * 1000 - 1;
 
         highlightedIndices.push(pointIndex); // Add to highlighted indices
+        addChromosomeLines(chromosome); // Add lines if not already added
 
         const trace1Highlight = {
             x: highlightedIndices.map(index => chromoData.x[index]),
@@ -155,61 +219,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
             },
             name: `Selected Points`
         };
-
-        // Add vertical lines to both plots
-        layout5.shapes = [
-            {
-                type: 'line',
-                x0: chrStart,
-                x1: chrStart,
-                y0: -2,
-                y1: 2,
-                line: {
-                    color: 'blue',
-                    width: 2,
-                    dash: 'dot'
-                }
-            },
-            {
-                type: 'line',
-                x0: chrEnd,
-                x1: chrEnd,
-                y0: -2,
-                y1: 2,
-                line: {
-                    color: 'blue',
-                    width: 2,
-                    dash: 'dot'
-                }
-            }
-        ];
-
-        layout6.shapes = [
-            {
-                type: 'line',
-                x0: chrStart,
-                x1: chrStart,
-                y0: 0,
-                y1: 1,
-                line: {
-                    color: 'blue',
-                    width: 2,
-                    dash: 'dot'
-                }
-            },
-            {
-                type: 'line',
-                x0: chrEnd,
-                x1: chrEnd,
-                y0: 0,
-                y1: 1,
-                line: {
-                    color: 'blue',
-                    width: 2,
-                    dash: 'dot'
-                }
-            }
-        ];
 
         Plotly.react('plotLogRatio', [trace1, trace1Highlight], layout5);
         Plotly.react('plotAllFreq', [trace2, trace2Highlight], layout6);
@@ -255,6 +264,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
             sumLogRatio += chromoData.logRatio[point.index];
             sumBAlleleFrequency += chromoData.bAlleleFrequency[point.index];
             highlightedIndices.push(point.index); // Add to highlighted indices
+            addChromosomeLines(chromoData.chromosomes[point.index]); // Add lines if not already added
         });
 
         const avgLogRatio = sumLogRatio / selectedPoints.length;
