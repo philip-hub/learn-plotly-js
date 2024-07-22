@@ -97,6 +97,17 @@ document.addEventListener('DOMContentLoaded', (event) => {
     document.getElementById('toggleLinesBtn').onclick = function() {
         showChromosomeLines = !showChromosomeLines;
         updateChromosomeLines();
+
+        // Update button text and style
+        if (showChromosomeLines) {
+            this.textContent = 'Toggle Chromosome Lines: ON';
+            this.classList.remove('off');
+            this.classList.add('on');
+        } else {
+            this.textContent = 'Toggle Chromosome Lines: OFF';
+            this.classList.remove('on');
+            this.classList.add('off');
+        }
     };
 
     function updateHighlightedPoints() {

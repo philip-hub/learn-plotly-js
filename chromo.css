@@ -59,3 +59,11 @@
     border: none;
     cursor: pointer;
 }
+
+#toggleLinesBtn.on {
+    background-color: #4CAF50;
+}
+
+#toggleLinesBtn.off {
+    background-color: #f44336;
+}
