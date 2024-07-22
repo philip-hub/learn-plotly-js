@@ -1,119 +1,198 @@
-
 document.addEventListener('DOMContentLoaded', (event) => {
-
-
-    function fitMathFunc(){
-        const x = []
-        const y = []
-        const text = []
-        
-        for(let i = 0; i <= 100; i++){
-            const xValue = i / 10;
-            const yValue = Math.sin(xValue); // Calculate y = sin(x)
-            x.push(xValue);
-            y.push(yValue);
-            text.push("Sin Function")
-        }
-        
-        return { x, y, text };
+    // Box-Muller Transform to generate random numbers with a normal distribution
+    function boxMullerTransform() {
+        const u = Math.random();
+        const v = Math.random();
+        const z0 = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+        return z0;
     }
 
-
-    function generateData(numPoints, numChromosomes){
+    function generateData(numPoints, numChromosomes) {
         const x = [];
         const logRatio = [];
         const bAlleleFrequency = [];
         const chromosomes = [];
 
-        for(let chr = 1; chr <= numChromosomes; chr++) {
-            for(let i =0; i<numPoints; i++){
-                const value = Math.random()*2 -1 //random numbers between -1 and 1
+        for (let chr = 1; chr <= numChromosomes; chr++) {
+            for (let i = 0; i < numPoints; i++) {
+                const value = boxMullerTransform(); // Use Box-Muller for normal distribution
+                const baf = Math.random(); // generate random values between 0 and 1
 
-                const baf = Math.random(); //generate random values
-
-                x.push(i+(chr-1)*numPoints);
+                x.push(i + (chr - 1) * numPoints);
                 logRatio.push(value);
                 bAlleleFrequency.push(baf);
                 chromosomes.push(chr);
             }
-
-
-
         }
 
-        return {x, logRatio, bAlleleFrequency, chromosomes};
+        return { x, logRatio, bAlleleFrequency, chromosomes };
     }
-        
-        
 
-    let line1 = {
-        x: [1, 2, 3, 4, 5],
-        y: [1, 6, 3, 6, 1],
+    const chromoData = generateData(1000, 24);
+
+    const trace1 = {
+        x: chromoData.x,
+        y: chromoData.logRatio,
         mode: 'markers',
         type: 'scatter',
-        name: 'Team A',
-        text: ['A-1','A-2','A-3','A-4','A-5'],
-        textposistion: 'top center',
-        textfont:{
-            family: 'Raleway, Sans-serif'
+        marker: {
+            size: 2,
+            color: chromoData.chromosomes,
+            colorscale: 'Viridis'
         },
-        marker: {size : 12}
-
+        name: 'Log Ratio'
     };
 
-    let data = [line1];
-
-    Plotly.newPlot('scatterPlot1', data);
-
-    let line2 = {
-        x: [2,3,4,5],
-        y: [4,1,7,1,4],
-        mode: 'markers',
-        type: 'scatter',
-        name: 'Team B',
-        text: ['B-1','B-2','B-3','B-4','B-5'],
-        textposistion: 'bottom center',
-        textfont:{
-            family: 'Raleway, Sans-serif'
-        },
-        marker: {size : 12}
-    }
-
-    let line3 = {
-        x:[1,2,3,4],
-        y:[12,9,15, 12],
-        mode: 'line+markers',
-        type:'scatter'
-    }
-
-    let data2 = [line1, line2]
-
-
-    let layout = {
+    const layout5 = {
+        title: 'Log Ratio',
         xaxis: {
-            range: [.75,5.25]
+            title: 'Genomic Position',
+            tickvals: Array.from({ length: 24 }, (_, i) => i * 1000 + 500),
+            ticktext: Array.from({ length: 24 }, (_, i) => i + 1)
         },
         yaxis: {
-            range: [0,8]
+            title: 'log ratio',
+            range: [-2, 2]
         },
-
-        legend:{
-            y: 0.5,
-            yref: 'paper',
-            font:{
-                family: 'Arial, sans-serif',
-                size: 20,
-                color: 'grey',
-            }
-        },
-
-        title:'Data Labels on the Plot'
-
+        shapes: [] // Initial empty shapes array for vertical lines
     };
 
-    Plotly.newPlot('scatterPlot2', data2,layout)
+    Plotly.newPlot('plotLogRatio', [trace1], layout5);
 
+    const trace2 = {
+        x: chromoData.x,
+        y: chromoData.bAlleleFrequency,
+        mode: 'markers',
+        type: 'scatter',
+        marker: {
+            size: 2,
+            color: chromoData.chromosomes,
+            colorscale: 'Viridis'
+        },
+        name: 'B Allele Frequency'
+    };
+
+    const layout6 = {
+        title: 'B Allele Frequency',
+        xaxis: {
+            title: 'Chromosomes',
+            tickvals: Array.from({ length: 24 }, (_, i) => i * 1000 + 500),
+            ticktext: Array.from({ length: 24 }, (_, i) => i + 1)
+        },
+        yaxis: {
+            title: 'B Allele Frequency',
+            range: [0, 1],
+            tickvals: [0, 0.25, 0.333, 0.5, 0.667, 0.75, 1],
+            ticktext: ['0', '1/4', '1/3', '1/2', '2/3', '3/4', '1']
+        },
+        shapes: [] // Initial empty shapes array for vertical lines
+    };
+
+    Plotly.newPlot('plotAllFreq', [trace2], layout6);
+
+    function highlightPoint(pointIndex) {
+        const highlightColor = 'red';
+        const xValue = chromoData.x[pointIndex];
+        const logRatioValue = chromoData.logRatio[pointIndex];
+        const bAlleleFrequencyValue = chromoData.bAlleleFrequency[pointIndex];
+        const chromosome = chromoData.chromosomes[pointIndex];
+        const chrStart = (chromosome - 1) * 1000;
+        const chrEnd = chromosome * 1000 - 1;
+
+        const trace1Highlight = {
+            x: [xValue],
+            y: [logRatioValue],
+            mode: 'markers',
+            type: 'scatter',
+            marker: {
+                size: 10,
+                color: highlightColor
+            },
+            name: `Selected Point`
+        };
+
+        const trace2Highlight = {
+            x: [xValue],
+            y: [bAlleleFrequencyValue],
+            mode: 'markers',
+            type: 'scatter',
+            marker: {
+                size: 10,
+                color: highlightColor
+            },
+            name: `Selected Point`
+        };
+
+        // Add vertical lines to both plots
+        layout5.shapes = [
+            {
+                type: 'line',
+                x0: chrStart,
+                x1: chrStart,
+                y0: -2,
+                y1: 2,
+                line: {
+                    color: 'blue',
+                    width: 2,
+                    dash: 'dot'
+                }
+            },
+            {
+                type: 'line',
+                x0: chrEnd,
+                x1: chrEnd,
+                y0: -2,
+                y1: 2,
+                line: {
+                    color: 'blue',
+                    width: 2,
+                    dash: 'dot'
+                }
+            }
+        ];
+
+        layout6.shapes = [
+            {
+                type: 'line',
+                x0: chrStart,
+                x1: chrStart,
+                y0: 0,
+                y1: 1,
+                line: {
+                    color: 'blue',
+                    width: 2,
+                    dash: 'dot'
+                }
+            },
+            {
+                type: 'line',
+                x0: chrEnd,
+                x1: chrEnd,
+                y0: 0,
+                y1: 1,
+                line: {
+                    color: 'blue',
+                    width: 2,
+                    dash: 'dot'
+                }
+            }
+        ];
+
+        Plotly.react('plotLogRatio', [trace1, trace1Highlight], layout5);
+        Plotly.react('plotAllFreq', [trace2, trace2Highlight], layout6);
+
+        // Update info box with the values
+        const infoBox = document.getElementById('infoBox');
+        infoBox.innerHTML = `Chromosome: ${chromosome}<br>Genomic Position: ${xValue}<br>Log Ratio: ${logRatioValue.toFixed(2)}<br>B Allele Frequency: ${bAlleleFrequencyValue.toFixed(2)}`;
+    }
+
+    document.getElementById('plotLogRatio').on('plotly_click', function(data) {
+        const pointIndex = data.points[0].pointIndex;
+        highlightPoint(pointIndex);
+    });
+
+    document.getElementById('plotAllFreq').on('plotly_click', function(data) {
+        const pointIndex = data.points[0].pointIndex;
+        highlightPoint(pointIndex);
+    });
 });
-
-
-
