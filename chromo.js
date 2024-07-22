@@ -29,6 +29,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
     }
 
     const chromoData = generateData(1000, 24);
+    let selectedPoints = []; // To track selected points
 
     const trace1 = {
         x: chromoData.x,
@@ -200,14 +201,59 @@ document.addEventListener('DOMContentLoaded', (event) => {
         infoBox.style.display = 'block';
     }
 
+    function highlightMultiplePoints() {
+        if (selectedPoints.length === 0) return;
+
+        let sumLogRatio = 0;
+        let sumBAlleleFrequency = 0;
+
+        selectedPoints.forEach(point => {
+            sumLogRatio += chromoData.logRatio[point.index];
+            sumBAlleleFrequency += chromoData.bAlleleFrequency[point.index];
+        });
+
+        const avgLogRatio = sumLogRatio / selectedPoints.length;
+        const avgBAlleleFrequency = sumBAlleleFrequency / selectedPoints.length;
+
+        // Update and show multiple points info box with the values
+        const multiInfoBoxContent = document.getElementById('multiInfoBoxContent');
+        const multiInfoBox = document.getElementById('multiInfoBox');
+        multiInfoBoxContent.innerHTML = `Selected Points: ${selectedPoints.length}<br>Avg Log Ratio: ${avgLogRatio.toFixed(2)}<br>Avg B Allele Frequency: ${avgBAlleleFrequency.toFixed(2)}`;
+
+        // Set the position of the info box
+        const lastPoint = selectedPoints[selectedPoints.length - 1];
+        const xPos = lastPoint.xaxis.l2p(lastPoint.x) + lastPoint.xaxis._offset;
+        const yPos = lastPoint.yaxis.l2p(lastPoint.y) + lastPoint.yaxis._offset;
+
+        // Get the bounding rectangle of the plot
+        const plotRect = document.getElementById(lastPoint.plotId).getBoundingClientRect();
+
+        multiInfoBox.style.top = `${plotRect.top + window.scrollY + yPos - multiInfoBox.offsetHeight - 10}px`; // 10px space above the point
+        multiInfoBox.style.left = `${plotRect.left + window.scrollX + xPos + 10}px`; // 10px space to the right of the point
+
+        multiInfoBox.style.display = 'block';
+    }
+
     document.getElementById('plotLogRatio').on('plotly_click', function(data) {
-        const pointIndex = data.points[0].pointIndex;
-        highlightPoint(pointIndex, data.points[0], 'plotLogRatio');
+        if (data.event.shiftKey) {
+            selectedPoints.push({ index: data.points[0].pointIndex, ...data.points[0], plotId: 'plotLogRatio' });
+            highlightMultiplePoints();
+        } else {
+            selectedPoints.length = 0;
+            const pointIndex = data.points[0].pointIndex;
+            highlightPoint(pointIndex, data.points[0], 'plotLogRatio');
+        }
     });
 
     document.getElementById('plotAllFreq').on('plotly_click', function(data) {
-        const pointIndex = data.points[0].pointIndex;
-        highlightPoint(pointIndex, data.points[0], 'plotAllFreq');
+        if (data.event.shiftKey) {
+            selectedPoints.push({ index: data.points[0].pointIndex, ...data.points[0], plotId: 'plotAllFreq' });
+            highlightMultiplePoints();
+        } else {
+            selectedPoints.length = 0;
+            const pointIndex = data.points[0].pointIndex;
+            highlightPoint(pointIndex, data.points[0], 'plotAllFreq');
+        }
     });
 
     // Close the info box when the close button is clicked
@@ -215,8 +261,15 @@ document.addEventListener('DOMContentLoaded', (event) => {
         document.getElementById('infoBox').style.display = 'none';
     };
 
+    // Close the multiple points info box when the close button is clicked
+    document.getElementById('closeMultiBtn').onclick = function() {
+        document.getElementById('multiInfoBox').style.display = 'none';
+        selectedPoints.length = 0;
+    };
+
     // Make the info box draggable
     dragElement(document.getElementById("infoBox"));
+    dragElement(document.getElementById("multiInfoBox"));
 
     function dragElement(elmnt) {
         var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
