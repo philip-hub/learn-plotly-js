@@ -38,7 +38,9 @@ document.addEventListener('DOMContentLoaded', (event) => {
     const layout5 = {
         title: 'Log Ratio',
         xaxis: {
-            title: 'Genomic Position'
+            title: 'Genomic Position',
+            tickvals: Array.from({ length: 24 }, (_, i) => i * 1000 + 500),
+            ticktext: Array.from({ length: 24 }, (_, i) => i + 1)
         },
         yaxis: {
             title: 'log ratio',
