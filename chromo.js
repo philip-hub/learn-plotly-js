@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
     const chromoData = generateData(1000, 24);
     let selectedPoints = []; // To track selected points
+    let highlightedIndices = []; // To track indices of highlighted points
 
     const trace1 = {
         x: chromoData.x,
@@ -100,28 +101,30 @@ document.addEventListener('DOMContentLoaded', (event) => {
         const chrStart = (chromosome - 1) * 1000;
         const chrEnd = chromosome * 1000 - 1;
 
+        highlightedIndices.push(pointIndex); // Add to highlighted indices
+
         const trace1Highlight = {
-            x: [xValue],
-            y: [logRatioValue],
+            x: highlightedIndices.map(index => chromoData.x[index]),
+            y: highlightedIndices.map(index => chromoData.logRatio[index]),
             mode: 'markers',
             type: 'scatter',
             marker: {
                 size: 10,
                 color: highlightColor
             },
-            name: `Selected Point`
+            name: `Selected Points`
         };
 
         const trace2Highlight = {
-            x: [xValue],
-            y: [bAlleleFrequencyValue],
+            x: highlightedIndices.map(index => chromoData.x[index]),
+            y: highlightedIndices.map(index => chromoData.bAlleleFrequency[index]),
             mode: 'markers',
             type: 'scatter',
             marker: {
                 size: 10,
                 color: highlightColor
             },
-            name: `Selected Point`
+            name: `Selected Points`
         };
 
         // Add vertical lines to both plots
@@ -222,6 +225,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         selectedPoints.forEach(point => {
             sumLogRatio += chromoData.logRatio[point.index];
             sumBAlleleFrequency += chromoData.bAlleleFrequency[point.index];
+            highlightedIndices.push(point.index); // Add to highlighted indices
         });
 
         const avgLogRatio = sumLogRatio / selectedPoints.length;
@@ -249,6 +253,34 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
         // Make the info box draggable
         dragElement(multiInfoBox, header);
+
+        // Update the plots to keep points highlighted
+        const trace1Highlight = {
+            x: highlightedIndices.map(index => chromoData.x[index]),
+            y: highlightedIndices.map(index => chromoData.logRatio[index]),
+            mode: 'markers',
+            type: 'scatter',
+            marker: {
+                size: 10,
+                color: 'red'
+            },
+            name: `Selected Points`
+        };
+
+        const trace2Highlight = {
+            x: highlightedIndices.map(index => chromoData.x[index]),
+            y: highlightedIndices.map(index => chromoData.bAlleleFrequency[index]),
+            mode: 'markers',
+            type: 'scatter',
+            marker: {
+                size: 10,
+                color: 'red'
+            },
+            name: `Selected Points`
+        };
+
+        Plotly.react('plotLogRatio', [trace1, trace1Highlight], layout5);
+        Plotly.react('plotAllFreq', [trace2, trace2Highlight], layout6);
     }
 
     document.getElementById('plotLogRatio').on('plotly_click', function(data) {
