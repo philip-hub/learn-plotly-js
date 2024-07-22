@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
         const logRatio = [];
         const bAlleleFrequency = [];
         const chromosomes = [];
+        const logIntensity = []; // For Graph A
+        const dna = []; // For Graph E
 
         for (let chr = 1; chr <= numChromosomes; chr++) {
             for (let i = 0; i < numPoints; i++) {
@@ -22,10 +24,12 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 logRatio.push(value);
                 bAlleleFrequency.push(baf);
                 chromosomes.push(chr);
+                logIntensity.push(Math.random() * 7 + 7); // Random log intensity for Graph A
+                dna.push(Math.random() * 200 - 100); // Random DNA values for Graph E
             }
         }
 
-        return { x, logRatio, bAlleleFrequency, chromosomes };
+        return { x, logRatio, bAlleleFrequency, chromosomes, logIntensity, dna };
     }
 
     const chromoData = generateData(1000, 24);
@@ -93,6 +97,91 @@ document.addEventListener('DOMContentLoaded', (event) => {
     };
 
     Plotly.newPlot('plotAllFreq', [trace2], layout6);
+
+    const traceA = {
+        x: chromoData.logIntensity,
+        y: chromoData.bAlleleFrequency,
+        mode: 'markers',
+        type: 'scatter',
+        marker: {
+            size: 5,
+            color: 'black'
+        },
+        name: 'Raw data'
+    };
+
+    const layoutA = {
+        title: 'Raw data',
+        xaxis: {
+            title: 'log intensity',
+            range: [7, 14]  // Adjust according to your data
+        },
+        yaxis: {
+            title: 'B allele frequency',
+            range: [0, 1]  // Adjust according to your data
+        }
+    };
+
+    Plotly.newPlot('plotA', [traceA], layoutA);
+
+    const subplots = [];
+    const layoutE = {
+        title: 'Allelic Imbalance',
+        grid: {rows: 4, columns: 6, pattern: 'independent'},
+        xaxis: {
+            range: [-100, 100],  // Adjust according to your data
+            title: 'DNA'
+        },
+        yaxis: {
+            title: 'Allelic Imbalance',
+            range: [-1.5, 1.5]  // Adjust according to your data
+        }
+    };
+
+    // Assuming you have data for each subplot in an array of objects
+    for (let chr = 1; chr <= 24; chr++) {
+        subplots.push({
+            x: chromoData.dna.slice((chr-1)*1000, chr*1000),
+            y: chromoData.bAlleleFrequency.slice((chr-1)*1000, chr*1000),
+            mode: 'markers',
+            type: 'scatter',
+            marker: {
+                size: 5,
+                color: 'green'
+            },
+            xaxis: `x${chr}`,
+            yaxis: `y${chr}`
+        });
+    }
+
+    Plotly.newPlot('plotE', subplots, layoutE);
+
+    const dataF = [
+        {
+            z: distogramData,  // Replace with your data
+            x: sampleLabels,  // Replace with your labels
+            y: sampleLabels,  // Replace with your labels
+            type: 'heatmap',
+            colorscale: [
+                [0, 'yellow'],
+                [0.77, 'orange'],
+                [0.86, 'red'],
+                [1, 'darkred']
+            ]
+        }
+    ];
+
+    const layoutF = {
+        title: 'Sample Identity Distogram',
+        xaxis: {
+            title: 'Samples'
+        },
+        yaxis: {
+            title: 'Samples'
+        }
+    };
+
+    Plotly.newPlot('plotF', dataF, layoutF);
 
     document.getElementById('toggleLinesBtn').onclick = function() {
         showChromosomeLines = !showChromosomeLines;
@@ -359,6 +448,42 @@ document.addEventListener('DOMContentLoaded', (event) => {
             selectedPoints.length = 0;
             const pointIndex = data.points[0].pointIndex;
             highlightPoint(pointIndex, data.points[0], 'plotAllFreq');
+        }
+    });
+
+    document.getElementById('plotA').on('plotly_click', function(data) {
+        if (data.event.shiftKey) {
+            selectedPoints.push({ index: data.points[0].pointIndex, ...data.points[0], plotId: 'plotA' });
+            createMultiInfoBox([...selectedPoints]);
+            selectedPoints = []; // Clear selected points after creating a multi-info box
+        } else {
+            selectedPoints.length = 0;
+            const pointIndex = data.points[0].pointIndex;
+            highlightPoint(pointIndex, data.points[0], 'plotA');
+        }
+    });
+
+    document.getElementById('plotE').on('plotly_click', function(data) {
+        if (data.event.shiftKey) {
+            selectedPoints.push({ index: data.points[0].pointIndex, ...data.points[0], plotId: 'plotE' });
+            createMultiInfoBox([...selectedPoints]);
+            selectedPoints = []; // Clear selected points after creating a multi-info box
+        } else {
+            selectedPoints.length = 0;
+            const pointIndex = data.points[0].pointIndex;
+            highlightPoint(pointIndex, data.points[0], 'plotE');
+        }
+    });
+
+    document.getElementById('plotF').on('plotly_click', function(data) {
+        if (data.event.shiftKey) {
+            selectedPoints.push({ index: data.points[0].pointIndex, ...data.points[0], plotId: 'plotF' });
+            createMultiInfoBox([...selectedPoints]);
+            selectedPoints = []; // Clear selected points after creating a multi-info box
+        } else {
+            selectedPoints.length = 0;
+            const pointIndex = data.points[0].pointIndex;
+            highlightPoint(pointIndex, data.points[0], 'plotF');
         }
     });
 
