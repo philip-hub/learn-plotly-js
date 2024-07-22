@@ -92,6 +92,35 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
     Plotly.newPlot('plotAllFreq', [trace2], layout6);
 
+    function updateHighlightedPoints() {
+        const trace1Highlight = {
+            x: highlightedIndices.map(index => chromoData.x[index]),
+            y: highlightedIndices.map(index => chromoData.logRatio[index]),
+            mode: 'markers',
+            type: 'scatter',
+            marker: {
+                size: 10,
+                color: 'red'
+            },
+            name: `Selected Points`
+        };
+
+        const trace2Highlight = {
+            x: highlightedIndices.map(index => chromoData.x[index]),
+            y: highlightedIndices.map(index => chromoData.bAlleleFrequency[index]),
+            mode: 'markers',
+            type: 'scatter',
+            marker: {
+                size: 10,
+                color: 'red'
+            },
+            name: `Selected Points`
+        };
+
+        Plotly.react('plotLogRatio', [trace1, trace1Highlight], layout5);
+        Plotly.react('plotAllFreq', [trace2, trace2Highlight], layout6);
+    }
+
     function highlightPoint(pointIndex, pointData, plotId) {
         const highlightColor = 'red';
         const xValue = chromoData.x[pointIndex];
@@ -249,38 +278,23 @@ document.addEventListener('DOMContentLoaded', (event) => {
         // Close the multiple points info box when the close button is clicked
         header.querySelector('.close-multi-info-box').onclick = function() {
             document.body.removeChild(multiInfoBox);
+
+            // Remove highlighted points
+            selectedPoints.forEach(point => {
+                const index = highlightedIndices.indexOf(point.index);
+                if (index > -1) {
+                    highlightedIndices.splice(index, 1);
+                }
+            });
+
+            updateHighlightedPoints(); // Update the plots to remove highlights
         };
 
         // Make the info box draggable
         dragElement(multiInfoBox, header);
 
         // Update the plots to keep points highlighted
-        const trace1Highlight = {
-            x: highlightedIndices.map(index => chromoData.x[index]),
-            y: highlightedIndices.map(index => chromoData.logRatio[index]),
-            mode: 'markers',
-            type: 'scatter',
-            marker: {
-                size: 10,
-                color: 'red'
-            },
-            name: `Selected Points`
-        };
-
-        const trace2Highlight = {
-            x: highlightedIndices.map(index => chromoData.x[index]),
-            y: highlightedIndices.map(index => chromoData.bAlleleFrequency[index]),
-            mode: 'markers',
-            type: 'scatter',
-            marker: {
-                size: 10,
-                color: 'red'
-            },
-            name: `Selected Points`
-        };
-
-        Plotly.react('plotLogRatio', [trace1, trace1Highlight], layout5);
-        Plotly.react('plotAllFreq', [trace2, trace2Highlight], layout6);
+        updateHighlightedPoints();
     }
 
     document.getElementById('plotLogRatio').on('plotly_click', function(data) {
@@ -310,6 +324,22 @@ document.addEventListener('DOMContentLoaded', (event) => {
     // Close the info box when the close button is clicked
     document.getElementById('closeBtn').onclick = function() {
         document.getElementById('infoBox').style.display = 'none';
+
+        // Remove highlighted point
+        const content = document.getElementById('infoBoxContent').innerHTML;
+        const match = content.match(/Genomic Position: (\d+)/);
+        if (match) {
+            const xValue = parseInt(match[1]);
+            const index = chromoData.x.indexOf(xValue);
+            if (index > -1) {
+                const idx = highlightedIndices.indexOf(index);
+                if (idx > -1) {
+                    highlightedIndices.splice(idx, 1);
+                }
+            }
+        }
+
+        updateHighlightedPoints(); // Update the plots to remove highlights
     };
 
     // Make the info box draggable
