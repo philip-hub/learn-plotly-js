@@ -1,4 +1,12 @@
 document.addEventListener('DOMContentLoaded', (event) => {
+    // Box-Muller Transform to generate random numbers with a normal distribution
+    function boxMullerTransform() {
+        const u = Math.random();
+        const v = Math.random();
+        const z0 = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+        return z0;
+    }
+
     function generateData(numPoints, numChromosomes) {
         const x = [];
         const logRatio = [];
@@ -7,8 +15,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
         for (let chr = 1; chr <= numChromosomes; chr++) {
             for (let i = 0; i < numPoints; i++) {
-                const value = Math.random() * 4 - 2; // random numbers between -2 and 2
-                const baf = Math.random(); // generate random values
+                const value = boxMullerTransform(); // Use Box-Muller for normal distribution
+                const baf = Math.random(); // generate random values between 0 and 1
 
                 x.push(i + (chr - 1) * numPoints);
                 logRatio.push(value);
@@ -174,8 +182,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
         Plotly.react('plotAllFreq', [trace2, trace2Highlight], layout6);
 
         // Update info box with the values
-        const infoBox = document.getElementById('infoBox');
-        infoBox.innerHTML = `Chromosome: ${chromosome}<br>Genomic Position: ${xValue}<br>Log Ratio: ${logRatioValue.toFixed(2)}<br>B Allele Frequency: ${bAlleleFrequencyValue.toFixed(2)}`;
+        const infoBoxContent = document.getElementById('infoBoxContent');
+        infoBoxContent.innerHTML = `Chromosome: ${chromosome}<br>Genomic Position: ${xValue}<br>Log Ratio: ${logRatioValue.toFixed(2)}<br>B Allele Frequency: ${bAlleleFrequencyValue.toFixed(2)}`;
     }
 
     document.getElementById('plotLogRatio').on('plotly_click', function(data) {
@@ -187,4 +195,48 @@ document.addEventListener('DOMContentLoaded', (event) => {
         const pointIndex = data.points[0].pointIndex;
         highlightPoint(pointIndex);
     });
+
+    // Make the info box draggable
+    dragElement(document.getElementById("infoBox"));
+
+    function dragElement(elmnt) {
+        var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+        if (document.getElementById(elmnt.id + "Header")) {
+            // if present, the header is where you move the DIV from:
+            document.getElementById(elmnt.id + "Header").onmousedown = dragMouseDown;
+        } else {
+            // otherwise, move the DIV from anywhere inside the DIV:
+            elmnt.onmousedown = dragMouseDown;
+        }
+
+        function dragMouseDown(e) {
+            e = e || window.event;
+            e.preventDefault();
+            // get the mouse cursor position at startup:
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            document.onmouseup = closeDragElement;
+            // call a function whenever the cursor moves:
+            document.onmousemove = elementDrag;
+        }
+
+        function elementDrag(e) {
+            e = e || window.event;
+            e.preventDefault();
+            // calculate the new cursor position:
+            pos1 = pos3 - e.clientX;
+            pos2 = pos4 - e.clientY;
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            // set the element's new position:
+            elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+            elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+        }
+
+        function closeDragElement() {
+            // stop moving when mouse button is released:
+            document.onmouseup = null;
+            document.onmousemove = null;
+        }
+    }
 });
