@@ -50,3 +50,12 @@
     margin: 0;
     padding: 0;
 }
+
+#toggleLinesBtn {
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
