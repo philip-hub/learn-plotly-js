@@ -5,7 +5,7 @@
     border: 1px solid #d3d3d3;
     text-align: left;
     padding: 10px;
-    width: 200px;
+    width: 220px;
     display: none; /* Initially hidden */
 }
 
@@ -15,6 +15,9 @@
     z-index: 10;
     background-color: #2196F3;
     color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 #closeBtn {
@@ -23,4 +26,6 @@
     color: white;
     font-size: 16px;
     cursor: pointer;
+    margin: 0;
+    padding: 0;
 }
