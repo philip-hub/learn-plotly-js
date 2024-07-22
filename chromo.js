@@ -181,9 +181,11 @@ document.addEventListener('DOMContentLoaded', (event) => {
         Plotly.react('plotLogRatio', [trace1, trace1Highlight], layout5);
         Plotly.react('plotAllFreq', [trace2, trace2Highlight], layout6);
 
-        // Update info box with the values
+        // Update and show info box with the values
         const infoBoxContent = document.getElementById('infoBoxContent');
+        const infoBox = document.getElementById('infoBox');
         infoBoxContent.innerHTML = `Chromosome: ${chromosome}<br>Genomic Position: ${xValue}<br>Log Ratio: ${logRatioValue.toFixed(2)}<br>B Allele Frequency: ${bAlleleFrequencyValue.toFixed(2)}`;
+        infoBox.style.display = 'block';
     }
 
     document.getElementById('plotLogRatio').on('plotly_click', function(data) {
