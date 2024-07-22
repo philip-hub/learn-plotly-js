@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
     let selectedPoints = []; // To track selected points
     let highlightedIndices = []; // To track indices of highlighted points
     let chromosomeLines = {}; // To track added lines for chromosomes
+    let showChromosomeLines = false; // State to track whether to show chromosome lines
 
     const trace1 = {
         x: chromoData.x,
@@ -93,6 +94,11 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
     Plotly.newPlot('plotAllFreq', [trace2], layout6);
 
+    document.getElementById('toggleLinesBtn').onclick = function() {
+        showChromosomeLines = !showChromosomeLines;
+        updateChromosomeLines();
+    };
+
     function updateHighlightedPoints() {
         const trace1Highlight = {
             x: highlightedIndices.map(index => chromoData.x[index]),
@@ -123,10 +129,10 @@ document.addEventListener('DOMContentLoaded', (event) => {
     }
 
     function addChromosomeLines(chromosome) {
-        const chrStart = (chromosome - 1) * 1000;
-        const chrEnd = chromosome * 1000 - 1;
+        if (showChromosomeLines && !chromosomeLines[chromosome]) {
+            const chrStart = (chromosome - 1) * 1000;
+            const chrEnd = chromosome * 1000 - 1;
 
-        if (!chromosomeLines[chromosome]) {
             chromosomeLines[chromosome] = true;
 
             layout5.shapes.push({
@@ -183,6 +189,20 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
             Plotly.react('plotLogRatio', [trace1, { ...trace1, marker: { ...trace1.marker, size: 2 } }], layout5);
             Plotly.react('plotAllFreq', [trace2, { ...trace2, marker: { ...trace2.marker, size: 2 } }], layout6);
+        }
+    }
+
+    function updateChromosomeLines() {
+        if (!showChromosomeLines) {
+            layout5.shapes = [];
+            layout6.shapes = [];
+            chromosomeLines = {}; // Clear the lines tracking
+            Plotly.react('plotLogRatio', [trace1, { ...trace1, marker: { ...trace1.marker, size: 2 } }], layout5);
+            Plotly.react('plotAllFreq', [trace2, { ...trace2, marker: { ...trace2.marker, size: 2 } }], layout6);
+        } else {
+            highlightedIndices.forEach(index => {
+                addChromosomeLines(chromoData.chromosomes[index]);
+            });
         }
     }
 
