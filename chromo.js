@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
     Plotly.newPlot('plotAllFreq', [trace2], layout6);
 
-    function highlightPoint(pointIndex) {
+    function highlightPoint(pointIndex, pointData) {
         const highlightColor = 'red';
         const xValue = chromoData.x[pointIndex];
         const logRatioValue = chromoData.logRatio[pointIndex];
@@ -185,17 +185,26 @@ document.addEventListener('DOMContentLoaded', (event) => {
         const infoBoxContent = document.getElementById('infoBoxContent');
         const infoBox = document.getElementById('infoBox');
         infoBoxContent.innerHTML = `Chromosome: ${chromosome}<br>Genomic Position: ${xValue}<br>Log Ratio: ${logRatioValue.toFixed(2)}<br>B Allele Frequency: ${bAlleleFrequencyValue.toFixed(2)}`;
+
+        // Get the position of the clicked point
+        const xPos = pointData.xaxis.l2p(pointData.x) + pointData.xaxis._offset;
+        const yPos = pointData.yaxis.l2p(pointData.y) + pointData.yaxis._offset;
+
+        // Set the position of the info box
+        infoBox.style.top = `${yPos - infoBox.offsetHeight - 10}px`; // 10px space above the point
+        infoBox.style.left = `${xPos + 10}px`; // 10px space to the right of the point
+
         infoBox.style.display = 'block';
     }
 
     document.getElementById('plotLogRatio').on('plotly_click', function(data) {
         const pointIndex = data.points[0].pointIndex;
-        highlightPoint(pointIndex);
+        highlightPoint(pointIndex, data.points[0]);
     });
 
     document.getElementById('plotAllFreq').on('plotly_click', function(data) {
         const pointIndex = data.points[0].pointIndex;
-        highlightPoint(pointIndex);
+        highlightPoint(pointIndex, data.points[0]);
     });
 
     // Make the info box draggable
