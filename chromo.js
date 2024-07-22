@@ -210,6 +210,11 @@ document.addEventListener('DOMContentLoaded', (event) => {
         highlightPoint(pointIndex, data.points[0], 'plotAllFreq');
     });
 
+    // Close the info box when the close button is clicked
+    document.getElementById('closeBtn').onclick = function() {
+        document.getElementById('infoBox').style.display = 'none';
+    };
+
     // Make the info box draggable
     dragElement(document.getElementById("infoBox"));
 
