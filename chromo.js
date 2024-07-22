@@ -201,8 +201,20 @@ document.addEventListener('DOMContentLoaded', (event) => {
         infoBox.style.display = 'block';
     }
 
-    function highlightMultiplePoints() {
-        if (selectedPoints.length === 0) return;
+    function createMultiInfoBox(selectedPoints) {
+        const multiInfoBox = document.createElement('div');
+        multiInfoBox.className = 'multi-info-box';
+
+        const header = document.createElement('div');
+        header.className = 'multi-info-box-header';
+        header.innerHTML = `<span>Selected Points Information</span><button class="close-multi-info-box">&times;</button>`;
+        multiInfoBox.appendChild(header);
+
+        const content = document.createElement('div');
+        content.className = 'multi-info-box-content';
+        multiInfoBox.appendChild(content);
+
+        document.body.appendChild(multiInfoBox);
 
         let sumLogRatio = 0;
         let sumBAlleleFrequency = 0;
@@ -215,10 +227,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         const avgLogRatio = sumLogRatio / selectedPoints.length;
         const avgBAlleleFrequency = sumBAlleleFrequency / selectedPoints.length;
 
-        // Update and show multiple points info box with the values
-        const multiInfoBoxContent = document.getElementById('multiInfoBoxContent');
-        const multiInfoBox = document.getElementById('multiInfoBox');
-        multiInfoBoxContent.innerHTML = `Selected Points: ${selectedPoints.length}<br>Avg Log Ratio: ${avgLogRatio.toFixed(2)}<br>Avg B Allele Frequency: ${avgBAlleleFrequency.toFixed(2)}`;
+        content.innerHTML = `Selected Points: ${selectedPoints.length}<br>Avg Log Ratio: ${avgLogRatio.toFixed(2)}<br>Avg B Allele Frequency: ${avgBAlleleFrequency.toFixed(2)}`;
 
         // Set the position of the info box
         const lastPoint = selectedPoints[selectedPoints.length - 1];
@@ -232,12 +241,21 @@ document.addEventListener('DOMContentLoaded', (event) => {
         multiInfoBox.style.left = `${plotRect.left + window.scrollX + xPos + 10}px`; // 10px space to the right of the point
 
         multiInfoBox.style.display = 'block';
+
+        // Close the multiple points info box when the close button is clicked
+        header.querySelector('.close-multi-info-box').onclick = function() {
+            document.body.removeChild(multiInfoBox);
+        };
+
+        // Make the info box draggable
+        dragElement(multiInfoBox, header);
     }
 
     document.getElementById('plotLogRatio').on('plotly_click', function(data) {
         if (data.event.shiftKey) {
             selectedPoints.push({ index: data.points[0].pointIndex, ...data.points[0], plotId: 'plotLogRatio' });
-            highlightMultiplePoints();
+            createMultiInfoBox([...selectedPoints]);
+            selectedPoints = []; // Clear selected points after creating a multi-info box
         } else {
             selectedPoints.length = 0;
             const pointIndex = data.points[0].pointIndex;
@@ -248,7 +266,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
     document.getElementById('plotAllFreq').on('plotly_click', function(data) {
         if (data.event.shiftKey) {
             selectedPoints.push({ index: data.points[0].pointIndex, ...data.points[0], plotId: 'plotAllFreq' });
-            highlightMultiplePoints();
+            createMultiInfoBox([...selectedPoints]);
+            selectedPoints = []; // Clear selected points after creating a multi-info box
         } else {
             selectedPoints.length = 0;
             const pointIndex = data.points[0].pointIndex;
@@ -261,52 +280,34 @@ document.addEventListener('DOMContentLoaded', (event) => {
         document.getElementById('infoBox').style.display = 'none';
     };
 
-    // Close the multiple points info box when the close button is clicked
-    document.getElementById('closeMultiBtn').onclick = function() {
-        document.getElementById('multiInfoBox').style.display = 'none';
-        selectedPoints.length = 0;
-    };
-
     // Make the info box draggable
     dragElement(document.getElementById("infoBox"));
-    dragElement(document.getElementById("multiInfoBox"));
 
-    function dragElement(elmnt) {
+    function dragElement(elmnt, header = elmnt) {
         var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-        if (document.getElementById(elmnt.id + "Header")) {
-            // if present, the header is where you move the DIV from:
-            document.getElementById(elmnt.id + "Header").onmousedown = dragMouseDown;
-        } else {
-            // otherwise, move the DIV from anywhere inside the DIV:
-            elmnt.onmousedown = dragMouseDown;
-        }
+        header.onmousedown = dragMouseDown;
 
         function dragMouseDown(e) {
             e = e || window.event;
             e.preventDefault();
-            // get the mouse cursor position at startup:
             pos3 = e.clientX;
             pos4 = e.clientY;
             document.onmouseup = closeDragElement;
-            // call a function whenever the cursor moves:
             document.onmousemove = elementDrag;
         }
 
         function elementDrag(e) {
             e = e || window.event;
             e.preventDefault();
-            // calculate the new cursor position:
             pos1 = pos3 - e.clientX;
             pos2 = pos4 - e.clientY;
             pos3 = e.clientX;
             pos4 = e.clientY;
-            // set the element's new position:
             elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
             elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
         }
 
         function closeDragElement() {
-            // stop moving when mouse button is released:
             document.onmouseup = null;
             document.onmousemove = null;
         }
